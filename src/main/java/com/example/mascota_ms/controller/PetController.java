@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/pets")
+@RequestMapping("/pets")
 public class PetController {
 
     private final PetRepository petRepository;
@@ -26,17 +26,13 @@ public class PetController {
     }
 
     /**
-     * POST /api/pets
-     * Crea una nueva mascota.
+     * GET /api/pets
+     * Obtiene todas las mascotas registradas en la base de datos (todos los dueños).
      */
-    @PostMapping
-    public ResponseEntity<Pet> createPet(@RequestBody Pet pet) {
-        try {
-            Pet savedPet = petRepository.save(pet);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedPet);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    @GetMapping("/owner")
+    public ResponseEntity<List<Pet>> getAllPets() {
+        List<Pet> pets = petRepository.findAll();
+        return ResponseEntity.ok(pets);
     }
 
     /**
@@ -52,7 +48,6 @@ public class PetController {
     /**
      * GET /api/pets/{id}
      * Obtiene una mascota por su ID.
-     * Usamos ResponseEntity<?> para devolver un Pet en caso de éxito o una respuesta vacía en caso de error 404.
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getPetById(@PathVariable String id) {
@@ -62,11 +57,24 @@ public class PetController {
     }
 
     /**
-     * PUT /api/pets/{id}
-     * Actualiza una mascota existente.
-     * Usamos ResponseEntity<?> para devolver un Pet en caso de éxito o una respuesta vacía en caso de error 404.
+     * POST /api/pets/post
+     * Crea una nueva mascota.
      */
-    @PutMapping("/{id}")
+    @PostMapping("/post")
+    public ResponseEntity<Pet> createPet(@RequestBody Pet pet) {
+        try {
+            Pet savedPet = petRepository.save(pet);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedPet);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    /**
+     * PUT /api/pets/put/{id}
+     * Actualiza una mascota existente.
+     */
+    @PutMapping("/put/{id}")
     public ResponseEntity<?> updatePet(@PathVariable String id, @RequestBody Pet updatedPet) {
         return petRepository.findById(id)
                 .map(existingPet -> { // Si se encuentra...
@@ -85,10 +93,10 @@ public class PetController {
     }
 
     /**
-     * DELETE /api/pets/{id}
-     * Elimina una mascota por su ID.
+     * DELETE /api/pets/delete/{id}
+     * Elimina una mascota por su ID en MongoDB.
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deletePet(@PathVariable String id) {
         if (!petRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
