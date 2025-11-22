@@ -20,6 +20,11 @@ public class PetController {
         this.petRepository = petRepository;
     }
 
+    @GetMapping
+    public String welcomeMessage() {
+        return "Bienvenido al microservicio de PetApp - Mascota-MS está funcionando correctamente ";
+    }
+
     /**
      * POST /api/pets
      * Crea una nueva mascota.
